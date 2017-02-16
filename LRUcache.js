@@ -38,9 +38,10 @@ var LRUCache = function (limit) {
 
 };
 
-var LRUCacheItem = function (val, key) {
+var LRUCacheItem = function (key, val) {
   this.val = val === undefined ? null : val;
   this.key = key === undefined ? null : key;
+  this.node = null;
 };
 
 LRUCache.prototype.size = function () {
@@ -48,10 +49,38 @@ LRUCache.prototype.size = function () {
 };
 
 LRUCache.prototype.get = function (key) {
-  
+  if (!(key in this.items)) { return null; }
+
+  var item = this.items[key]
+  this.ordering.moveToFront(item.node)
+  return item.val
 };
 
 LRUCache.prototype.set = function (key, val) {
+  var item;
+  if (key in this.items){
+    item = this._items[key]
+    item.val = val;
+    this.promote(item)
+  } else {
+    // make space if necessary
+    if (this.full()) { this.prune() }
+    this.size += 1
+
+    item = new LRUCacheItem(key, val)
+    item.node = this.ordering.unshift(item)
+    this.items[key] = item;
+  }
+};
+
+LRUCache.prototype.full = function () {
+  return this.size >= this.limit;
+};
+
+LRUCache.prototype.prune = function () {
+  let oldestItem = this.ordering.pop()
+  delete this.items[oldestItem.key]
+  this.size = Math.max(0, this.size-1)
 };
 
 
