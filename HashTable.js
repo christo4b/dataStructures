@@ -39,6 +39,16 @@ const makeHashTable = (limit)=> {
 
   result.retrieve = key => {
 
+    let index = getIndexBelowMaxForKey(key, limit)
+    if (!storage[index]) return;
+
+    for (let i=0;i<storage[index].length;i++){
+      let pair = storage[index][i]
+      if (key === pair[0]){
+        return pair[1]
+      }
+    }
+    
   };
 
   result.remove = key => {
