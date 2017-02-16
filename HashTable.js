@@ -32,7 +32,7 @@ const makeHashTable = (limit)=> {
 
     // handle resizing:
     if (size >= limit * 0.75) {
-      // resize(limit * 2)
+      resize(limit * 2)
     }
 
   };
@@ -48,14 +48,49 @@ const makeHashTable = (limit)=> {
         return pair[1]
       }
     }
-    
+
   };
 
   result.remove = key => {
-
+    let index = getIndexBelowMaxForKey(key, limit)
+    if (!storage[index]) return;
+    let temp = []
+    for (let i=0;i<storage[index].length;i++){
+      let pair = storage[index][i]
+      if (key === pair[0]){
+        temp = pair[1]
+        delete pairs[i]
+        size--
+        if (size <= limit*0.25){
+          resize(limit/2)
+        }
+      }
+    }
+    return temp
   };
 
-
+  let resizing = false;
+  function resize(newSize){
+    if (!resizing){
+      resizing = true;
+      let pairs = []
+      for (let i = 0; i<storage.length;i++){
+        if (!storage[i]) continue;
+        for (let j = storage[i].length-1; j>=0;j--){
+          if (!storage[i][j]) continue;
+          pairs.push(storage[i][j]);
+          storage[i].length--
+        }
+      }
+      limit = newSize
+      storage = []
+      size = 0
+      for (let i=0;i<pairs.length;i++){
+        result.insert(pairs[i][0], pairs[i][1])
+      }
+      resizing = false;
+    }
+  }
 
 }
 
